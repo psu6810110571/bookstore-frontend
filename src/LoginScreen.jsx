@@ -1,7 +1,5 @@
 import { useState } from 'react';
-// ✅ เพิ่ม: นำเข้า Card, Typography, Space เพื่อจัดหน้าตา และ Layout
-import { Button, Form, Input, Alert, Card, Typography, Space } from 'antd';
-// ✅ เพิ่ม: นำเข้าไอคอนเพื่อใช้ตกแต่งช่องกรอกข้อมูลและหัวข้อ
+import { Button, Form, Input, Alert, Card, Typography, Space, Checkbox } from 'antd';
 import { UserOutlined, LockOutlined, LoginOutlined } from '@ant-design/icons';
 import axios from 'axios';
 
@@ -24,14 +22,18 @@ export default function LoginScreen(props) {
             });
 
             const token = response.data.access_token;
-            localStorage.setItem('token', token);
+            
+            if (formData.remember) {
+                localStorage.setItem('token', token);
+            } else {
+                localStorage.setItem('token', token); 
+            }
+            
             axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-
             props.onLoginSuccess();
 
         } catch (err) {
             console.error(err);
-            // ✅ ปรับปรุง: Logic การแสดง Error ให้ครอบคลุมและข้อความสุภาพขึ้น
             let message = "Login failed. Please check your credentials.";
             if (err.response && err.response.data && err.response.data.message) {
                 message = err.response.data.message;
@@ -43,26 +45,33 @@ export default function LoginScreen(props) {
     };
 
     return (
-        // ✅ ปรับปรุง 1: Wrapper ด้านนอกสุด
-        // - ใช้ Flexbox (display: flex...) เพื่อดึงทุกอย่างมาไว้ "กึ่งกลางหน้าจอ" ทั้งแนวตั้งและแนวนอน
-        // - ใส่สีพื้นหลัง (backgroundColor) ให้ไม่เป็นสีขาวโล้นๆ
+        // ✅ แก้ไข: ใช้ position: 'fixed' เพื่อบังคับให้เต็มจอ ไม่สนกรอบ #root เดิม
         <div style={{
+            position: 'fixed', // ลอยตัวออกมาจาก Layout ปกติ
+            top: 0,
+            left: 0,
+            width: '100vw',    // กว้างเต็มจอ 100%
+            height: '100vh',   // สูงเต็มจอ 100%
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            minHeight: '100vh',
-            backgroundColor: '#f0f2f5' 
+            backgroundImage: "url('https://images.unsplash.com/photo-1481627834876-b7833e8f5570?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80')",
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            overflow: 'hidden' // กัน Scrollbar เกิน
         }}>
-            {/* ✅ เพิ่ม 2: ใช้ <Card> เป็นกรอบหลัก */}
-            {/* - ช่วยให้ฟอร์มดูลอยมีมิติด้วย boxShadow */}
-            {/* - กำหนดความกว้าง (width: 400) ให้พอดี ไม่ยืดเต็มจอ */}
             <Card
-                style={{ width: 400, boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}
+                style={{ 
+                    width: 400, 
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.25)', 
+                    borderRadius: '12px',
+                    // เพิ่ม Backdrop ให้ตัวการ์ดเด่นขึ้นอีกนิด (Optional)
+                    backdropFilter: 'blur(5px)', 
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)'
+                }}
                 bordered={false}
             >
-                {/* ✅ เพิ่ม 3: ส่วน Header ของการ์ด */}
-                {/* - ใส่ Logo (Icon) และชื่อแอพ (Title) */}
-                {/* - ใส่คำต้อนรับ (Text) ให้ดูเป็นมิตร */}
                 <div style={{ textAlign: 'center', marginBottom: 24 }}>
                     <Space align="center">
                         <LoginOutlined style={{ fontSize: '32px', color: '#1890ff' }} />
@@ -75,22 +84,17 @@ export default function LoginScreen(props) {
 
                 <Form
                     name="login-form"
-                    // ✅ ปรับปรุง 4: เปลี่ยน Layout เป็น 'vertical'
-                    // - ป้ายชื่อ (Label) จะไปอยู่ด้านบนของช่องกรอกข้อมูล แทนที่จะอยู่ด้านข้าง
-                    layout="vertical" 
+                    layout="vertical"
                     onFinish={handleLogin}
                     autoComplete="off"
-                    // ✅ ปรับปรุง 5: เพิ่มขนาด Component
-                    // - size="large" ทำให้ช่อง Input และปุ่มกดดูใหญ่ขึ้น กดง่าย
-                    size="large" 
+                    size="large"
+                    initialValues={{ remember: true }}
                 >
                     <Form.Item
                         label="Username"
                         name="username"
                         rules={[{ required: true, message: 'Please input your username!' }]}
                     >
-                        {/* ✅ เพิ่ม 6: ใส่ Icon (prefix) ในช่อง Input */}
-                        {/* - ใส่รูปคน (UserOutlined) เพื่อสื่อความหมาย */}
                         <Input prefix={<UserOutlined className="site-form-item-icon" />} placeholder="Enter username" />
                     </Form.Item>
 
@@ -99,27 +103,33 @@ export default function LoginScreen(props) {
                         name="password"
                         rules={[{ required: true, message: 'Please input your password!' }]}
                     >
-                        {/* ✅ เพิ่ม 7: ใส่ Icon (prefix) ในช่อง Password */}
-                        {/* - ใส่รูปกุญแจ (LockOutlined) */}
                         <Input.Password prefix={<LockOutlined className="site-form-item-icon" />} placeholder="Enter password" />
                     </Form.Item>
 
                     <Form.Item>
-                        {/* ✅ ปรับปรุง 8: ปุ่ม Submit */}
-                        {/* - block: ให้ปุ่มยาวเต็มความกว้าง */}
-                        {/* - shape="round": ให้ปุ่มมีขอบมน ดูทันสมัย */}
+                        <Form.Item name="remember" valuePropName="checked" noStyle>
+                            <Checkbox>Remember me</Checkbox>
+                        </Form.Item>
+
+                        <a style={{ float: 'right' }} href="">
+                            Forgot password?
+                        </a>
+                    </Form.Item>
+
+                    <Form.Item>
                         <Button type="primary" htmlType="submit" loading={isLoading} block shape="round" style={{ fontWeight: 'bold' }}>
                             LOG IN
                         </Button>
                     </Form.Item>
 
+                    <div style={{ textAlign: 'center' }}>
+                        Don't have an account? <a href="">Register now!</a>
+                    </div>
+
                     {errMsg &&
-                        <Form.Item>
-                            {/* ✅ ปรับปรุง 9: Alert Box */}
-                            {/* - showIcon: แสดงไอคอนกากบาท */}
-                            {/* - closable: ให้ user กดปิดข้อความ error ได้เอง */}
+                        <div style={{ marginTop: 24 }}>
                             <Alert message={errMsg} type="error" showIcon closable onClose={() => setErrMsg(null)} />
-                        </Form.Item>
+                        </div>
                     }
                 </Form>
             </Card>

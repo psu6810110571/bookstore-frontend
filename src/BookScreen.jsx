@@ -20,21 +20,40 @@ export default function BookScreen(props) {
     const [searchText, setSearchText] = useState('');
     const [selectedCategory, setSelectedCategory] = useState(null);
 
+    // ✅ ฟังก์ชันช่วยในการตั้งค่า Header สำหรับส่ง Token
+    const getAuthHeader = () => {
+        const token = localStorage.getItem('token'); // แก้ไขชื่อ key ให้ตรงกับที่ระบบคุณใช้เก็บ Token
+        return {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        };
+    };
+
     const fetchBooks = async () => {
         try {
-            const response = await axios.get(URL_BOOK);
+            // ✅ ส่ง getAuthHeader() ไปพร้อมกับคำขอ
+            const response = await axios.get(URL_BOOK, getAuthHeader());
             setBookData(response.data);
-        } catch (err) { console.log(err); }
+        } catch (err) { 
+            console.error("Fetch Books Error:", err);
+            if (err.response?.status === 401) {
+                message.error("กรุณาเข้าสู่ระบบใหม่อีกครั้ง (Session Expired)");
+            }
+        }
     };
 
     const fetchCategories = async () => {
         try {
-            const response = await axios.get(URL_CATEGORY);
+            // ✅ ส่ง getAuthHeader() ไปพร้อมกับคำขอ
+            const response = await axios.get(URL_CATEGORY, getAuthHeader());
             setCategories(response.data.map(cat => ({
                 label: cat.name,
                 value: cat.id
             })));
-        } catch (err) { console.log(err); }
+        } catch (err) { 
+            console.error("Fetch Categories Error:", err);
+        }
     };
 
     useEffect(() => {
@@ -60,18 +79,20 @@ export default function BookScreen(props) {
 
     const handleAddBook = async (book) => {
         try {
-            await axios.post(URL_BOOK, book);
+            // ✅ เพิ่ม getAuthHeader()
+            await axios.post(URL_BOOK, book, getAuthHeader());
             message.success("เพิ่มหนังสือสำเร็จ! 📚");
             fetchBooks();
         } catch (err) { 
             console.log(err); 
-            message.error("เพิ่มหนังสือไม่สำเร็จ");
+            message.error("เพิ่มหนังสือไม่สำเร็จ: ไม่มีสิทธิ์เข้าถึง");
         }
     };
 
     const handleDeleted = async (id) => {
         try {
-            await axios.delete(`${URL_BOOK}/${id}`);
+            // ✅ เพิ่ม getAuthHeader()
+            await axios.delete(`${URL_BOOK}/${id}`, getAuthHeader());
             message.success("ลบหนังสือเรียบร้อย 🗑️");
             fetchBooks();
         } catch (err) { console.log(err); }
@@ -79,7 +100,8 @@ export default function BookScreen(props) {
 
     const handleLikeBook = async (book) => {
         try {
-            await axios.post(`${URL_BOOK}/${book.id}/like`);
+            // ✅ เพิ่ม getAuthHeader()
+            await axios.post(`${URL_BOOK}/${book.id}/like`, {}, getAuthHeader());
             fetchBooks(); 
         } catch (err) {
             console.log("Like Failed:", err);
@@ -97,7 +119,8 @@ export default function BookScreen(props) {
             if (updateData.price) updateData.price = parseFloat(updateData.price);
             if (updateData.stock) updateData.stock = parseInt(updateData.stock);
 
-            await axios.patch(`${URL_BOOK}/${editItem.id}`, updateData);
+            // ✅ เพิ่ม getAuthHeader()
+            await axios.patch(`${URL_BOOK}/${editItem.id}`, updateData, getAuthHeader());
             
             setEditItem(null); 
             fetchBooks();
@@ -146,7 +169,6 @@ export default function BookScreen(props) {
                             <AddBook onBookAdded={handleAddBook} categories={categories} />
                         </div>
 
-                        {/* ✅ แก้ไข: เปลี่ยนจาก bordered={false} เป็น variant="none" */}
                         <Card variant="none" style={{ backgroundColor: '#fafafa', marginBottom: 20 }}>
                             <Row gutter={16}>
                                 <Col span={16}>
@@ -171,7 +193,6 @@ export default function BookScreen(props) {
                             </Row>
                         </Card>
 
-                        {/* ✅ แก้ไข: เปลี่ยนจาก orientation เป็น titlePlacement */}
                         <Divider titlePlacement="left" style={{ borderColor: '#ccc', fontWeight: 'bold', color: '#555' }}>
                             📦 Book List ({filteredBooks.length} items) - Value: ${totalAmount.toLocaleString()}
                         </Divider>

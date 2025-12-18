@@ -1,5 +1,6 @@
-import { Modal, Form, Input, InputNumber, Select, Button } from 'antd';
+import { Modal, Form, Input, InputNumber, Select, Button, Row, Col } from 'antd';
 import { useState } from 'react';
+import { PlusOutlined, BookOutlined, DollarOutlined, NumberOutlined, LinkOutlined } from '@ant-design/icons';
 
 export default function AddBook({ onBookAdded, categories }) {
   const [form] = Form.useForm();
@@ -30,55 +31,120 @@ export default function AddBook({ onBookAdded, categories }) {
 
   return (
     <>
-      <Button type="primary" onClick={showModal} style={{ marginBottom: 16 }}>
-        + Add New Book
+      <Button 
+        type="primary" 
+        onClick={showModal} 
+        icon={<PlusOutlined />} 
+        size="large"
+        style={{ marginBottom: 16, borderRadius: '6px' }}
+      >
+        Add New Book
       </Button>
 
       <Modal
-        title="Add New Book"
+        title={<span><BookOutlined /> Add New Book to Inventory</span>}
         open={isModalOpen}
         onCancel={handleCancel}
         onOk={() => form.submit()}
-        width={600}
+        width={700}
+        okText="Create Book"
+        cancelText="Cancel"
       >
-        <Form form={form} layout="vertical" onFinish={handleSubmit}>
-          <Form.Item name="title" label="Title" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
+        <Form 
+            form={form} 
+            layout="vertical" 
+            onFinish={handleSubmit}
+            style={{ marginTop: '20px' }}
+        >
+          <Row gutter={16}>
+            <Col span={24}>
+                <Form.Item 
+                    name="title" 
+                    label="Book Title" 
+                    rules={[{ required: true, message: 'Please enter book title' }]}
+                >
+                    <Input placeholder="e.g. The Great Gatsby" />
+                </Form.Item>
+            </Col>
+          </Row>
 
-          <Form.Item name="author" label="Author" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
+          <Row gutter={16}>
+            <Col span={12}>
+                <Form.Item 
+                    name="author" 
+                    label="Author" 
+                    rules={[{ required: true, message: 'Author name is required' }]}
+                >
+                    <Input placeholder="e.g. F. Scott Fitzgerald" />
+                </Form.Item>
+            </Col>
+            <Col span={12}>
+                <Form.Item 
+                    name="categoryId" 
+                    label="Category" 
+                    rules={[{ required: true, message: 'Select a category' }]}
+                >
+                    <Select 
+                        placeholder="Select category"
+                        options={categories}
+                    />
+                </Form.Item>
+            </Col>
+          </Row>
 
           <Form.Item name="description" label="Description">
-            <Input.TextArea rows={3} />
+            <Input.TextArea rows={3} placeholder="Brief summary of the book..." />
           </Form.Item>
 
-          <Form.Item name="price" label="Price" rules={[{ required: true }]}>
-            <InputNumber min={0} step={0.01} style={{ width: '100%' }} />
-          </Form.Item>
-
-          <Form.Item name="isbn" label="ISBN" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-
-          <Form.Item name="stock" label="Stock" rules={[{ required: true }]}>
-            <InputNumber min={0} style={{ width: '100%' }} />
-          </Form.Item>
-
-          <Form.Item name="categoryId" label="Category" rules={[{ required: true }]}>
-            <Select 
-                placeholder="Select a category"
-                options={categories}
-            />
-          </Form.Item>
+          <Row gutter={16}>
+            <Col span={8}>
+                <Form.Item 
+                    name="price" 
+                    label="Price" 
+                    rules={[{ required: true, message: 'Enter price' }]}
+                >
+                    <InputNumber 
+                        min={0} 
+                        step={0.01} 
+                        style={{ width: '100%' }} 
+                        prefix={<DollarOutlined />}
+                        placeholder="0.00"
+                    />
+                </Form.Item>
+            </Col>
+            <Col span={8}>
+                <Form.Item 
+                    name="stock" 
+                    label="Stock Quantity" 
+                    rules={[{ required: true, message: 'Enter stock' }]}
+                >
+                    <InputNumber 
+                        min={0} 
+                        style={{ width: '100%' }} 
+                        placeholder="0"
+                    />
+                </Form.Item>
+            </Col>
+            <Col span={8}>
+                <Form.Item 
+                    name="isbn" 
+                    label="ISBN" 
+                    rules={[{ required: true, message: 'Enter ISBN' }]}
+                >
+                    <Input prefix={<NumberOutlined />} placeholder="13 digits" />
+                </Form.Item>
+            </Col>
+          </Row>
 
           <Form.Item 
             name="coverUrl" 
-            label="Cover URL"
+            label="Cover Image URL"
             initialValue=""
           >
-            <Input placeholder="Paste image URL or leave blank" />
+            <Input 
+                prefix={<LinkOutlined />} 
+                placeholder="https://example.com/image.jpg" 
+            />
           </Form.Item>
         </Form>
       </Modal>

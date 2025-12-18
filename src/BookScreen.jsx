@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
-import { Layout, Divider, Button, message, Spin } from 'antd';
+import { useState, useEffect, useMemo } from 'react';
+import { Layout, Divider, Button, message, Input, Select, Row, Col, Card } from 'antd'; 
+import { SearchOutlined, FilterOutlined } from '@ant-design/icons'; 
 import axios from 'axios';
 import BookList from './components/BookList';
 import AddBook from './components/AddBook';
@@ -14,21 +15,16 @@ const { Header, Content } = Layout;
 export default function BookScreen(props) { 
     const [bookData, setBookData] = useState([]);
     const [categories, setCategories] = useState([]);
-    const [editItem, setEditItem] = useState(null);
-    const [loading, setLoading] = useState(false);
+    const [editItem, setEditItem] = useState(null); 
+    
+    const [searchText, setSearchText] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState(null);
 
     const fetchBooks = async () => {
         try {
-            setLoading(true);
             const response = await axios.get(URL_BOOK);
-            console.log("📚 Fetched books:", response.data);
             setBookData(response.data);
-        } catch (err) { 
-            console.error("❌ Fetch books failed:", err);
-            message.error("Failed to load books");
-        } finally {
-            setLoading(false);
-        }
+        } catch (err) { console.log(err); }
     };
 
     const fetchCategories = async () => {
@@ -38,9 +34,7 @@ export default function BookScreen(props) {
                 label: cat.name,
                 value: cat.id
             })));
-        } catch (err) { 
-            console.error("❌ Fetch categories failed:", err);
-        }
+        } catch (err) { console.log(err); }
     };
 
     useEffect(() => {
@@ -48,13 +42,29 @@ export default function BookScreen(props) {
         fetchCategories();
     }, []);
 
+    const filteredBooks = useMemo(() => {
+        return bookData.filter(book => {
+            const text = searchText.toLowerCase();
+            const matchesText = 
+                book.title.toLowerCase().includes(text) ||
+                book.author.toLowerCase().includes(text) ||
+                (book.isbn && book.isbn.includes(text));
+
+            const matchesCategory = selectedCategory 
+                ? book.category && book.category.id === selectedCategory 
+                : true;
+
+            return matchesText && matchesCategory;
+        });
+    }, [bookData, searchText, selectedCategory]);
+
     const handleAddBook = async (book) => {
         try {
             await axios.post(URL_BOOK, book);
             message.success("เพิ่มหนังสือสำเร็จ! 📚");
             fetchBooks();
         } catch (err) { 
-            console.error("❌ Add book failed:", err); 
+            console.log(err); 
             message.error("เพิ่มหนังสือไม่สำเร็จ");
         }
     };
@@ -64,23 +74,16 @@ export default function BookScreen(props) {
             await axios.delete(`${URL_BOOK}/${id}`);
             message.success("ลบหนังสือเรียบร้อย 🗑️");
             fetchBooks();
-        } catch (err) { 
-            console.error("❌ Delete failed:", err);
-            message.error("ลบไม่สำเร็จ");
-        }
+        } catch (err) { console.log(err); }
     };
 
     const handleLikeBook = async (book) => {
         try {
-            console.log("🔵 Attempting to Like Book ID:", book.id);
-            const response = await axios.post(`${URL_BOOK}/${book.id}/like`);
-            console.log("✅ Like Success:", response.data);
-            message.success(`Liked "${book.title}" 👍`);
-            fetchBooks();
+            await axios.post(`${URL_BOOK}/${book.id}/like`);
+            fetchBooks(); 
         } catch (err) {
-            console.error("❌ Like Failed:", err.response || err);
-            const errorMsg = err.response?.data?.message || err.message || "Unknown error";
-            message.error(`Cannot Like: ${errorMsg}`);
+            console.log("Like Failed:", err);
+            message.error("กด Like ไม่สำเร็จ");
         }
     };
 
@@ -90,13 +93,10 @@ export default function BookScreen(props) {
 
     const handleUpdateBook = async (values) => {
         try {
-            const { id, category, createdAt, updatedAt, likeCount, ...updateData } = values;
-            
+            const { id, category, createdAt, updatedAt, ...updateData } = values;
             if (updateData.price) updateData.price = parseFloat(updateData.price);
             if (updateData.stock) updateData.stock = parseInt(updateData.stock);
 
-            console.log("📝 Updating book ID:", editItem.id, "Data:", updateData);
-            
             await axios.patch(`${URL_BOOK}/${editItem.id}`, updateData);
             
             setEditItem(null); 
@@ -104,16 +104,16 @@ export default function BookScreen(props) {
             message.success("แก้ไขข้อมูลสำเร็จ! 🎉");
 
         } catch (err) { 
-            console.error("❌ Update Failed:", err.response || err);
+            console.log("❌ Update Failed:", err);
             const serverError = err.response?.data?.message || err.message;
-            message.error(`บันทึกไม่สำเร็จ: ${serverError}`);
+            message.error(`บันทึกไม่สำเร็จ: ${JSON.stringify(serverError)}`);
         }
     };
 
-    const totalAmount = bookData.reduce((sum, book) => sum + (book.price * book.stock), 0);
+    const totalAmount = filteredBooks.reduce((sum, book) => sum + (book.price * book.stock), 0);
 
     return (
-        <Layout style={{ minHeight: '100vh' }}> 
+        <Layout> 
             <Header style={{ 
                 backgroundColor: '#fff', 
                 padding: '0 50px', 
@@ -121,48 +121,69 @@ export default function BookScreen(props) {
                 justifyContent: 'space-between', 
                 alignItems: 'center',
                 borderBottom: '1px solid #f0f0f0', 
-                height: '64px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                height: '64px'
             }}>
-                <h1 style={{ margin: 0, fontSize: '24px', color: '#1890ff', fontWeight: 600 }}>
+                <h1 style={{ margin: 0, fontSize: '24px', color: '#593309', fontWeight: 600 }}>
                     📚 BookNook Inventory
                 </h1>
                 {props.onLogout && <Button danger onClick={props.onLogout}>Logout</Button>}
             </Header>
 
             <Content style={{ padding: '0 50px', backgroundColor: '#f5f5f5', minHeight: 'calc(100vh - 64px)' }}>
-                <div style={{ margin: '0 auto', paddingTop: '20px', maxWidth: '1400px' }}>
+                <div style={{ margin: '0 auto', paddingTop: '20px', maxWidth: '1280px' }}>
                     
-                    <Dashboard data={bookData} loading={loading} />
+                    <Dashboard data={bookData} />
    
                     <div style={{ 
-                        padding: '20px', 
+                        padding: '24px', 
                         marginBottom: '20px', 
                         backgroundColor: '#fff', 
                         borderRadius: '8px',
                         boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-                        margin: '20px 0'
                     }}>
-                        <AddBook onBookAdded={handleAddBook} categories={categories} />
-                    </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                            <h2 style={{ margin: 0 }}>Manage Books</h2>
+                            <AddBook onBookAdded={handleAddBook} categories={categories} />
+                        </div>
+
+                        {/* ✅ แก้ไข: เปลี่ยนจาก bordered={false} เป็น variant="none" */}
+                        <Card variant="none" style={{ backgroundColor: '#fafafa', marginBottom: 20 }}>
+                            <Row gutter={16}>
+                                <Col span={16}>
+                                    <Input
+                                        placeholder="Search by Title, Author, or ISBN..."
+                                        prefix={<SearchOutlined style={{ color: '#bfbfbf' }} />}
+                                        onChange={(e) => setSearchText(e.target.value)}
+                                        allowClear
+                                        size="large"
+                                    />
+                                </Col>
+                                <Col span={8}>
+                                    <Select
+                                        placeholder={<span><FilterOutlined /> Filter by Category</span>}
+                                        style={{ width: '100%' }}
+                                        allowClear
+                                        onChange={(value) => setSelectedCategory(value)}
+                                        options={categories}
+                                        size="large"
+                                    />
+                                </Col>
+                            </Row>
+                        </Card>
+
+                        {/* ✅ แก้ไข: เปลี่ยนจาก orientation เป็น titlePlacement */}
+                        <Divider titlePlacement="left" style={{ borderColor: '#ccc', fontWeight: 'bold', color: '#555' }}>
+                            📦 Book List ({filteredBooks.length} items) - Value: ${totalAmount.toLocaleString()}
+                        </Divider>
     
-                    <Divider style={{ 
-                        borderColor: '#ccc', 
-                        fontWeight: 'bold', 
-                        color: '#555' 
-                    }}>
-                        📦 Book List (Total Value: ${totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
-                    </Divider>
-    
-                    <div style={{ paddingBottom: '30px' }}>
-                        <Spin spinning={loading} tip="Loading books...">
+                        <div style={{ paddingBottom: '30px' }}>
                             <BookList
-                                data={bookData}
+                                data={filteredBooks}
                                 onDeleted={handleDeleted}
                                 onEdit={handleEdit}
                                 onLiked={handleLikeBook}
                             />
-                        </Spin>
+                        </div>
                     </div>
                 </div>
             </Content>

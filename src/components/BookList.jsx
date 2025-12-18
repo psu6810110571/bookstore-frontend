@@ -45,28 +45,18 @@ export default function BookList(props) {
       dataIndex: 'coverUrl',
       key: 'cover',
       width: 90,
-      render: (coverUrl, record) => {
-        if (!coverUrl || coverUrl === '' || coverUrl === null) {
-          return (
-            <Image
-              width={70}
-              src="https://placehold.co/70x100/eee/999?text=No+Cover"
-              alt="No Cover"
-              preview={false}
-            />
-          );
-        }
-        
-        const isExternalUrl = coverUrl.startsWith('http://') || coverUrl.startsWith('https://');
+      render: (coverUrl) => {
+        const isExternalUrl = coverUrl?.startsWith('http://') || coverUrl?.startsWith('https://');
         const imageSrc = isExternalUrl ? coverUrl : `http://localhost:3080${coverUrl}`;
         
         return (
           <Image
             width={70}
             src={imageSrc}
-            fallback="https://placehold.co/70x100/eee/999?text=Error"
-            alt={record.title}
-            preview={true}
+            /* ✅ แก้ไข: เปลี่ยน fallback เป็นค่าว่างเพื่อให้ใช้รูปเริ่มต้นของ Ant Design ป้องกันปัญหาเน็ตโหลด placeholder ไม่ได้ */
+            fallback=" " 
+            alt="Book Cover"
+            preview={false}
           />
         );
       },

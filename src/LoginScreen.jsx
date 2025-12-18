@@ -4,7 +4,6 @@ import { UserOutlined, LockOutlined, LoginOutlined } from '@ant-design/icons';
 import axios from 'axios';
 
 const { Title, Text } = Typography;
-
 const URL_AUTH = "/api/auth/login";
 
 export default function LoginScreen(props) {
@@ -22,16 +21,7 @@ export default function LoginScreen(props) {
             });
 
             const token = response.data.access_token;
-            
-            if (formData.remember) {
-                localStorage.setItem('token', token);
-            } else {
-<<<<<<< HEAD
-                sessionStorage.setItem('token', token);
-=======
-                localStorage.setItem('token', token); 
->>>>>>> e4e750484a6f6f2e0432ca16a76298fe41cf4b8c
-            }
+            localStorage.setItem('token', token); 
             
             axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
             props.onLoginSuccess();
@@ -49,22 +39,12 @@ export default function LoginScreen(props) {
     };
 
     return (
-<<<<<<< HEAD
         <div style={{
-            position: 'fixed',
+            position: 'fixed', 
             top: 0,
             left: 0,
-            width: '100vw',
-            height: '100vh',
-=======
-        // ✅ แก้ไข: ใช้ position: 'fixed' เพื่อบังคับให้เต็มจอ ไม่สนกรอบ #root เดิม
-        <div style={{
-            position: 'fixed', // ลอยตัวออกมาจาก Layout ปกติ
-            top: 0,
-            left: 0,
-            width: '100vw',    // กว้างเต็มจอ 100%
-            height: '100vh',   // สูงเต็มจอ 100%
->>>>>>> e4e750484a6f6f2e0432ca16a76298fe41cf4b8c
+            width: '100vw', 
+            height: '100vh', 
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
@@ -72,38 +52,23 @@ export default function LoginScreen(props) {
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
-<<<<<<< HEAD
             overflow: 'hidden'
-=======
-            overflow: 'hidden' // กัน Scrollbar เกิน
->>>>>>> e4e750484a6f6f2e0432ca16a76298fe41cf4b8c
         }}>
             <Card
                 style={{ 
                     width: 400, 
                     boxShadow: '0 8px 24px rgba(0,0,0,0.25)', 
                     borderRadius: '12px',
-<<<<<<< HEAD
-                    backdropFilter: 'blur(5px)', 
-                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                    border: 'none'
-                }}
-=======
-                    // เพิ่ม Backdrop ให้ตัวการ์ดเด่นขึ้นอีกนิด (Optional)
                     backdropFilter: 'blur(5px)', 
                     backgroundColor: 'rgba(255, 255, 255, 0.95)'
                 }}
-                bordered={false}
->>>>>>> e4e750484a6f6f2e0432ca16a76298fe41cf4b8c
+                /* ✅ แก้ไข: เปลี่ยนจาก bordered={false} เป็น variant="none" */
+                variant="none"
             >
                 <div style={{ textAlign: 'center', marginBottom: 24 }}>
                     <Space align="center">
                         <LoginOutlined style={{ fontSize: '32px', color: '#1890ff' }} />
-<<<<<<< HEAD
-                        <Title level={2} style={{ margin: 0 }}>BookNook</Title>
-=======
                         <Title level={2} style={{ margin: 0 }}>Bookstore</Title>
->>>>>>> e4e750484a6f6f2e0432ca16a76298fe41cf4b8c
                     </Space>
                     <Text type="secondary" style={{ display: 'block', marginTop: 8 }}>
                         Welcome back! Please login to continue.
@@ -123,11 +88,7 @@ export default function LoginScreen(props) {
                         name="username"
                         rules={[{ required: true, message: 'Please input your username!' }]}
                     >
-<<<<<<< HEAD
-                        <Input prefix={<UserOutlined />} placeholder="demo" />
-=======
                         <Input prefix={<UserOutlined className="site-form-item-icon" />} placeholder="Enter username" />
->>>>>>> e4e750484a6f6f2e0432ca16a76298fe41cf4b8c
                     </Form.Item>
 
                     <Form.Item
@@ -135,25 +96,14 @@ export default function LoginScreen(props) {
                         name="password"
                         rules={[{ required: true, message: 'Please input your password!' }]}
                     >
-<<<<<<< HEAD
-                        <Input.Password prefix={<LockOutlined />} placeholder="1234" />
-=======
                         <Input.Password prefix={<LockOutlined className="site-form-item-icon" />} placeholder="Enter password" />
->>>>>>> e4e750484a6f6f2e0432ca16a76298fe41cf4b8c
                     </Form.Item>
 
                     <Form.Item>
                         <Form.Item name="remember" valuePropName="checked" noStyle>
                             <Checkbox>Remember me</Checkbox>
                         </Form.Item>
-
-<<<<<<< HEAD
-                        <a style={{ float: 'right' }} href="#forgot">
-=======
-                        <a style={{ float: 'right' }} href="">
->>>>>>> e4e750484a6f6f2e0432ca16a76298fe41cf4b8c
-                            Forgot password?
-                        </a>
+                        <a style={{ float: 'right' }} href="">Forgot password?</a>
                     </Form.Item>
 
                     <Form.Item>
@@ -162,13 +112,8 @@ export default function LoginScreen(props) {
                         </Button>
                     </Form.Item>
 
-<<<<<<< HEAD
-                    <div style={{ textAlign: 'center', fontSize: '12px', color: '#999', marginTop: 8 }}>
-                        Demo: demo / 1234
-=======
                     <div style={{ textAlign: 'center' }}>
                         Don't have an account? <a href="">Register now!</a>
->>>>>>> e4e750484a6f6f2e0432ca16a76298fe41cf4b8c
                     </div>
 
                     {errMsg &&

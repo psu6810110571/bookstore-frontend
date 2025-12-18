@@ -26,7 +26,7 @@ export default function LoginScreen(props) {
             if (formData.remember) {
                 localStorage.setItem('token', token);
             } else {
-                localStorage.setItem('token', token); 
+                sessionStorage.setItem('token', token);
             }
             
             axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -45,13 +45,12 @@ export default function LoginScreen(props) {
     };
 
     return (
-        // ✅ แก้ไข: ใช้ position: 'fixed' เพื่อบังคับให้เต็มจอ ไม่สนกรอบ #root เดิม
         <div style={{
-            position: 'fixed', // ลอยตัวออกมาจาก Layout ปกติ
+            position: 'fixed',
             top: 0,
             left: 0,
-            width: '100vw',    // กว้างเต็มจอ 100%
-            height: '100vh',   // สูงเต็มจอ 100%
+            width: '100vw',
+            height: '100vh',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
@@ -59,23 +58,22 @@ export default function LoginScreen(props) {
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
-            overflow: 'hidden' // กัน Scrollbar เกิน
+            overflow: 'hidden'
         }}>
             <Card
                 style={{ 
                     width: 400, 
                     boxShadow: '0 8px 24px rgba(0,0,0,0.25)', 
                     borderRadius: '12px',
-                    // เพิ่ม Backdrop ให้ตัวการ์ดเด่นขึ้นอีกนิด (Optional)
                     backdropFilter: 'blur(5px)', 
-                    backgroundColor: 'rgba(255, 255, 255, 0.95)'
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    border: 'none'
                 }}
-                bordered={false}
             >
                 <div style={{ textAlign: 'center', marginBottom: 24 }}>
                     <Space align="center">
                         <LoginOutlined style={{ fontSize: '32px', color: '#1890ff' }} />
-                        <Title level={2} style={{ margin: 0 }}>Bookstore</Title>
+                        <Title level={2} style={{ margin: 0 }}>BookNook</Title>
                     </Space>
                     <Text type="secondary" style={{ display: 'block', marginTop: 8 }}>
                         Welcome back! Please login to continue.
@@ -95,7 +93,7 @@ export default function LoginScreen(props) {
                         name="username"
                         rules={[{ required: true, message: 'Please input your username!' }]}
                     >
-                        <Input prefix={<UserOutlined className="site-form-item-icon" />} placeholder="Enter username" />
+                        <Input prefix={<UserOutlined />} placeholder="demo" />
                     </Form.Item>
 
                     <Form.Item
@@ -103,7 +101,7 @@ export default function LoginScreen(props) {
                         name="password"
                         rules={[{ required: true, message: 'Please input your password!' }]}
                     >
-                        <Input.Password prefix={<LockOutlined className="site-form-item-icon" />} placeholder="Enter password" />
+                        <Input.Password prefix={<LockOutlined />} placeholder="1234" />
                     </Form.Item>
 
                     <Form.Item>
@@ -111,7 +109,7 @@ export default function LoginScreen(props) {
                             <Checkbox>Remember me</Checkbox>
                         </Form.Item>
 
-                        <a style={{ float: 'right' }} href="">
+                        <a style={{ float: 'right' }} href="#forgot">
                             Forgot password?
                         </a>
                     </Form.Item>
@@ -122,8 +120,8 @@ export default function LoginScreen(props) {
                         </Button>
                     </Form.Item>
 
-                    <div style={{ textAlign: 'center' }}>
-                        Don't have an account? <a href="">Register now!</a>
+                    <div style={{ textAlign: 'center', fontSize: '12px', color: '#999', marginTop: 8 }}>
+                        Demo: demo / 1234
                     </div>
 
                     {errMsg &&

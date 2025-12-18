@@ -1,4 +1,4 @@
-import { Modal, Form, Input, InputNumber, Select, Button, message } from 'antd';
+import { Modal, Form, Input, InputNumber, Select, Button } from 'antd';
 import { useState } from 'react';
 
 export default function AddBook({ onBookAdded, categories }) {
@@ -15,7 +15,6 @@ export default function AddBook({ onBookAdded, categories }) {
   };
 
   const handleSubmit = (values) => {
-    // แปลงค่าตัวเลขให้ชัวร์ก่อนส่ง
     const newBook = {
         ...values,
         price: parseFloat(values.price),
@@ -23,10 +22,8 @@ export default function AddBook({ onBookAdded, categories }) {
         categoryId: values.categoryId
     };
 
-    // ✅ แก้ไขแล้ว: ลบตัวหนังสือ ออก เรียกใช้ฟังก์ชันได้ปกติ
     onBookAdded(newBook); 
     
-    // ปิด Modal และล้างค่า
     setIsModalOpen(false);
     form.resetFields();
   };
@@ -41,7 +38,7 @@ export default function AddBook({ onBookAdded, categories }) {
         title="Add New Book"
         open={isModalOpen}
         onCancel={handleCancel}
-        onOk={() => form.submit()} // สั่งให้ Form submit เมื่อกดปุ่ม OK
+        onOk={() => form.submit()}
         width={600}
       >
         <Form form={form} layout="vertical" onFinish={handleSubmit}>
@@ -69,11 +66,10 @@ export default function AddBook({ onBookAdded, categories }) {
             <InputNumber min={0} style={{ width: '100%' }} />
           </Form.Item>
 
-          {/* ใช้ Select ของ Ant Design เพื่อความสวยงามและรับค่า categories */}
           <Form.Item name="categoryId" label="Category" rules={[{ required: true }]}>
             <Select 
                 placeholder="Select a category"
-                options={categories} // รับ options มาจาก props
+                options={categories}
             />
           </Form.Item>
 

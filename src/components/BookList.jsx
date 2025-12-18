@@ -45,18 +45,28 @@ export default function BookList(props) {
       dataIndex: 'coverUrl',
       key: 'cover',
       width: 90,
-      render: (coverUrl) => {
-        // ✅ ตรวจสอบว่าเป็น URL เต็มหรือไม่
-        const isExternalUrl = coverUrl?.startsWith('http://') || coverUrl?.startsWith('https://');
+      render: (coverUrl, record) => {
+        if (!coverUrl || coverUrl === '' || coverUrl === null) {
+          return (
+            <Image
+              width={70}
+              src="https://placehold.co/70x100/eee/999?text=No+Cover"
+              alt="No Cover"
+              preview={false}
+            />
+          );
+        }
+        
+        const isExternalUrl = coverUrl.startsWith('http://') || coverUrl.startsWith('https://');
         const imageSrc = isExternalUrl ? coverUrl : `http://localhost:3080${coverUrl}`;
         
         return (
           <Image
             width={70}
             src={imageSrc}
-            fallback="https://via.placeholder.com/70x100"
-            alt="Book Cover"
-            preview={false}
+            fallback="https://placehold.co/70x100/eee/999?text=Error"
+            alt={record.title}
+            preview={true}
           />
         );
       },

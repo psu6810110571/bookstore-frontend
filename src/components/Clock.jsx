@@ -8,7 +8,6 @@ export default function Clock() {
       setTime(new Date());
     }, 1000);
 
-    // Cleanup function: หยุดเวลาเมื่อ component นี้ถูกปิด
     return () => {
       clearInterval(timerID);
     };

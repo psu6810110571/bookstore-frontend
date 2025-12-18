@@ -1,0 +1,140 @@
+import { Space, Table, Button, Image, Tag } from 'antd';
+
+export default function BookList(props) {
+  
+  const columns = [
+    {
+      title: 'Title',
+      dataIndex: 'title',
+      key: 'title',
+      width: 150,
+    },
+    {
+      title: 'Author',
+      dataIndex: 'author',
+      key: 'author',
+      width: 120,
+    },
+    {
+      title: 'Description',
+      dataIndex: 'description',
+      key: 'description',
+      ellipsis: true, 
+    },
+    {
+      title: 'Price',
+      dataIndex: 'price',
+      key: 'price',
+      width: 80,
+      render: (price) => `$${price}`
+    },
+    {
+      title: 'ISBN',
+      dataIndex: 'isbn',
+      key: 'isbn',
+      width: 120,
+    },
+    {
+      title: 'Stock',
+      dataIndex: 'stock',
+      key: 'stock',
+      width: 80,
+    },
+    {
+      title: 'Cover',
+      dataIndex: 'coverUrl',
+      key: 'cover',
+      width: 90,
+      render: (coverUrl, record) => {
+        // ✅ เช็คว่าไม่มีรูปภาพ (รองรับ null, undefined, และ empty string)
+        if (!coverUrl || coverUrl === '' || coverUrl === null) {
+          return (
+            <Image
+              width={70}
+              src="https://placehold.co/70x100/eee/999?text=No+Cover"
+              alt="No Cover"
+              preview={false}
+            />
+          );
+        }
+        
+        // ตรวจสอบว่าเป็น URL เต็มหรือไม่
+        const isExternalUrl = coverUrl.startsWith('http://') || coverUrl.startsWith('https://');
+        
+        // ✅ ใช้ Port 3080 สำหรับ Static Files (Nginx) ตามสไลด์หน้า 8
+        const imageSrc = isExternalUrl ? coverUrl : `http://localhost:3080${coverUrl}`;
+        
+        return (
+          <Image
+            width={70}
+            src={imageSrc}
+            fallback="https://placehold.co/70x100/eee/999?text=Error"
+            alt={record.title}
+            preview={true}
+          />
+        );
+      },
+    },
+    {
+      title: 'Category',
+      dataIndex: 'category',
+      key: 'category',
+      width: 120,
+      render: (cat) => {
+        const categoryName = cat?.name || 'Unknown';
+        let color;
+        if (categoryName === 'Fiction') color = 'volcano'; 
+        else if (categoryName === 'Science Fiction') color = 'green';
+        else if (categoryName === 'Biography') color = 'blue';
+        else color = 'geekblue'; 
+        return <Tag color={color}>{categoryName}</Tag>
+      }
+    },
+    {
+      title: 'Liked',
+      dataIndex: 'likeCount',
+      key: 'likeCount',
+      width: 80,
+    },
+    {
+      title: 'Action',
+      key: 'action',
+      width: 170,
+      render: (text, record) => (
+        <Space size="small">
+          <Button 
+            type="primary" 
+            size="small" 
+            onClick={() => props.onLiked && props.onLiked(record)}
+          >
+            Like
+          </Button>
+          
+          <Button 
+            size="small" 
+            onClick={() => props.onEdit(record)}
+          >
+            Edit
+          </Button> 
+          
+          <Button 
+            danger 
+            size="small" 
+            onClick={() => props.onDeleted(record.id)}
+          >
+            Delete
+          </Button>
+        </Space>
+      ),
+    },
+  ];
+
+  return (
+    <Table 
+      columns={columns} 
+      dataSource={props.data} 
+      rowKey="id" 
+      style={{ borderRadius: '8px', overflow: 'hidden' }}
+    />
+  );
+}
